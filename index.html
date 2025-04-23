@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>whether-App</title>
+    <style>
+        #nav {
+            display: flex;
+            height: 40px;
+            background-color: black;
+            color: white;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input,
+        button {
+            background: none;
+            border: none;
+            color: white;
+            outline: none;
+        }
+
+
+        #error-message {
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            font-size:xx-large;
+            color: red;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        #con {
+            width: 40%;
+            margin: auto;
+            text-align: center;
+            gap: 20px;
+            display: flex;
+        }
+
+        #con>div {
+            width: 50%;
+        }
+
+        .gmap_canvas {
+            margin: auto;
+            overflow: hidden;
+            background: none !important;
+            height: 500px;
+            width: 600px;
+        }
+
+        #day7 {
+            width: 70%;
+            margin: auto;
+            display: flex;
+            padding: 30px;
+            border-radius: 10px;
+            justify-content: space-between;
+        }
+
+        #day7>div {
+            color: white;
+            padding: 8px 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        body {
+            margin: 0%;
+            padding: 15px;
+            background: url(https://img.freepik.com/premium-photo/weather-forecast-background-climate-change-concept_795881-1425.jpg);
+            color: white;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="nav">
+        <div>
+            <button onclick="getWeather()" id="auto">Auto Location</button>
+        </div>
+        <div>
+            <input type="text" id="city" placeholder="Enter City Name">
+            <button onclick="getData()" id="submit">Submit</button>
+        </div>
+    </div>
+              <!-- Error Message Div -->
+              <div id="error-message"></div>
+
+    <div id="con">
+        <div id="one1"></div>
+        <div id="two2"></div>
+    </div>
+
+
+    <div class="gmap_canvas">
+        <iframe width="600" height="500" id="gmap_canvas" frameborder="0" scrolling="no" marginheight="0"
+            marginwidth="0"></iframe>
+    </div>
+
+    <div id="day7">
+        <div id="one"></div>
+        <div id="two"></div>
+        <div id="three"></div>
+        <div id="four"></div>
+        <div id="five"></div>
+        <div id="six"></div>
+        <div id="seven"></div>
+    </div>
+
+
+
+
+</body>
+
+</html>
+<script>
+    function getData() {
+
+        let city = document.getElementById("city").value
+        let errorDiv = document.getElementById("error-message");
+            errorDiv.innerText = "";
+
+            if (!city) {
+                errorDiv.innerText = "Please enter a city name.";
+                return;
+            }
+
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=8a3d206981c2cdaef3e3be297ffc21f6`
+
+
+        fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.cod != 200) {
+                        errorDiv.innerText = "City not found. Please enter a valid city name.";
+                        return;
+                    }
+                    append(res);
+                })
+                .catch(err => {
+                    errorDiv.innerText = "Something went wrong. Please try again.";
+                    console.error(err);
+                });
+        }
+
+
+    function getDataLocation(lat, lon) {
+
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=8a3d206981c2cdaef3e3be297ffc21f6`
+
+
+        fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.cod != 200) {
+                        errorDiv.innerText = "Could not fetch weather for your location.";
+                        return;
+                    }
+                    append(res);
+                })
+                .catch(err => {
+                    errorDiv.innerText = "Location access failed or network error.";
+                    console.error(err);
+                });
+        }
+
+
+
+    function append(data) {
+        let con = document.getElementById("con")
+        let one1 = document.getElementById("one1")
+        let two2 = document.getElementById("two2")
+
+        
+        // Update map
+        let map = document.getElementById("gmap_canvas")
+        map.src = `https://maps.google.com/maps?q=${data.name}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+
+        con.innerHTML = ""
+        one1.innerHTML = ""
+        two2.innerHTML = ""
+        
+        let city = document.createElement("h1")
+        city.innerText = `${data.name}`;
+
+        let maxt = document.createElement("h4")
+        maxt.innerText = `Max-Temp : ${Math.ceil(data.main.temp_max - 273)} °C`
+
+        let temp = document.createElement("h1")
+        temp.innerText = `${Math.ceil(data.main.temp - 273)} °C`
+
+        let mint = document.createElement("h4")
+        mint.innerText = `Min-Temp : ${Math.ceil(data.main.temp_min - 280)} °C`
+
+        let humid = document.createElement("h4")
+        humid.innerText = `Humidity : ${data.main.humidity} %`
+
+
+        let sunr = document.createElement("h4")
+        sunr.innerText = "Sun Rise "
+
+        let a = new Date((data.sys.sunrise) * 1000)
+
+        let suns = document.createElement("h4")
+        suns.innerText = "Sun Set "
+
+        let b = new Date((data.sys.sunset) * 1000)
+
+
+        let wind = document.createElement("h4")
+        wind.innerText = `Wind : ${data.wind.speed} km/h`
+
+        let cloud = document.createElement("h4")
+        cloud.innerText = `${data.weather[0].description}`
+
+        one1.append(temp, maxt, mint, humid, wind, cloud)
+        two2.append(city, sunr, a, suns, b)
+        con.append(one1, two2)
+
+      //-------------for 7 day--------------------//
+
+        let url3 = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude=hourly,minutely&appid=8a3d206981c2cdaef3e3be297ffc21f6`;
+
+        fetch(url3)
+            .then(function (data1) {
+                return data1.json()
+            }).then(function (data1) {
+                let today = new Date()
+                let day = today.getDay()
+
+                day++
+                let daylist = ["Sun", "Mon", "Tue", "Wed ", "Thu", "Fri", "Sat"];
+                let counter = ["one", "two", "three", "four", "five", "six", "seven"]
+                let temp = [];
+                for (let i = 0; i < 7; i++) {
+                    if (day == 7) {
+                        day = 0
+                    }
+                    temp.push(daylist[day])
+                    day++
+
+                    let icon = document.createElement("img");
+                    icon.src = `http://openweathermap.org/img/wn/${data1.daily[i].weather[0].icon}.png`;
+
+                    let value = document.createElement("div");
+                    value.innerHTML = Math.floor(data1.daily[i].temp.min - 273) + "<sup>o</sup>C";
+                    let dayv = document.createElement("div");
+                    dayv.innerText = temp[i];
+                    document.querySelector(`#${counter[i]}`).innerText = "";
+                    document.querySelector(`#${counter[i]}`).append(dayv, icon, value);
+
+
+                }
+            })
+    }
+
+    //-----------get auto weather----------------
+
+
+    function getWeather() {
+
+        navigator.geolocation.getCurrentPosition(success)
+        function success(possition) {
+            var crd = possition.coords;
+
+            console.log('Your current position is:');
+            console.log(`Latitude : ${crd.latitude}`);
+            console.log(`Longitude: ${crd.longitude}`);
+            console.log(`More or less ${crd.accuracy} meters.`);
+
+            getDataLocation(crd.latitude, crd.longitude)
+        }
+    }
+
+    
+     // ENTER key triggers submit
+     document.getElementById("city").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            getData();
+        }
+    });
+</script>
